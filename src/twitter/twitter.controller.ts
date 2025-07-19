@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, Post } from '@nestjs/common';
 import { TwitterService } from './twitter.service';
 
 @Controller('twitter')
@@ -7,5 +7,10 @@ export class TwitterController {
   @Get(':keyword')
   getTweets(@Param('keyword') keyword: string) {
     return this.twitterService.GetTweets(keyword);
+  }
+
+  @Post('/user/:userid')
+  AddUserToDB(@Param('userid') userid: string) {
+    return this.twitterService.AddUserToDB(userid);
   }
 }

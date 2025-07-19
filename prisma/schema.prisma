@@ -11,6 +11,7 @@ model Source {
   id           String   @id @default(cuid())
   username     String   @unique
   displayName  String?
+  description  String? // Yeni eklenen alan: Kaynağın açıklaması
   followerCount Int
   tweets       Tweet[]
 

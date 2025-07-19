@@ -1,9 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { CursoredData, Rettiwt, Tweet } from 'rettiwt-api';
 import * as dotenv from 'dotenv';
+import { CreateUserDto } from './dto/create-user.dto';
+import { PrismaService } from 'src/prisma.service';
 
 try {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
   dotenv.config();
 } catch (error) {
   console.error('Error loading .env file:', error);
@@ -50,5 +53,45 @@ export class TwitterService {
     const jsonObj: JSON = JSON.parse(JSON.stringify(dataList)) as JSON;
     console.log(jsonObj);
     return jsonObj;
+  }
+
+  async GetUserDetails(userid: string) {
+    const user: CreateUserDto = new CreateUserDto();
+    await rettiwt.user
+      .details(userid)
+      .then((data) => {
+        user.username = data?.userName ?? '';
+        user.displayName = data?.fullName ?? '';
+        user.followerCount = data?.followersCount ?? 0;
+        user.createdAt = data?.createdAt ?? '';
+        user.description = data?.description ?? '';
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+    return user;
+  }
+  constructor(private readonly prisma: PrismaService) {}
+  async AddUserToDB(userid: string) {
+    // This method is a placeholder for adding a user.
+    // Implement the logic to add a user to your database or service.
+    console.log('User added:', userid);
+    const user: CreateUserDto = await this.GetUserDetails(userid);
+
+    if (!user.username) {
+      return { message: 'User not found' };
+    }
+
+    await this.prisma.source.create({
+      data: {
+        username: user.username,
+        displayName: user.displayName,
+        followerCount: user.followerCount,
+        createdAt: user.createdAt,
+        description: user.description,
+      },
+    });
+
+    return { message: 'User added successfully', user };
   }
 }
